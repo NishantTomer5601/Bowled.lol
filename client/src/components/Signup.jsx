@@ -35,6 +35,16 @@ export default function SignupPage() {
       }
   };
 
+  const handleGoogleLogin = async () =>{
+    try{
+        await signInWithPopup(auth, googleProvider);
+        navigate('/');
+    }
+    catch(error){
+        setError(error.message);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Navigation */}
@@ -131,6 +141,15 @@ export default function SignupPage() {
                 </button>
               </div>
             </form>
+
+            <br/>
+            {/* Google Login Button */}
+            <button
+                onClick={handleGoogleLogin}
+                className="w-full max-w-md flex justify-center items-center mb-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                Login with Google
+            </button>
             <p className="mt-6 text-center text-sm">
               Already have an account?{" "}
               <Link to="/login" className="text-green-400 hover:text-green-300 font-medium">

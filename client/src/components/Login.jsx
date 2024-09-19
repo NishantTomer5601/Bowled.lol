@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { auth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth , googleProvider} from '../firebase';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
@@ -27,6 +27,15 @@ export default function LoginPage() {
             setError('Invalid email or password');
         })
   };
+  const handleGoogleLogin = async () =>{
+    try{
+        await signInWithPopup(auth, googleProvider);
+        navigate('/');
+    }
+    catch(error){
+        setError(error.message);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
@@ -115,7 +124,16 @@ export default function LoginPage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </button>
               </div>
+            
             </form>
+            <br/>
+            {/* Google Login Button */}
+            <button
+                onClick={handleGoogleLogin}
+                className="w-full max-w-md flex justify-center items-center mb-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                Login with Google
+            </button>
             <p className="mt-6 text-center text-sm">
               Don't have an account?{" "}
               <Link to="/signup" className="text-green-400 hover:text-green-300 font-medium">
