@@ -91,7 +91,7 @@ function Home() {
                 </p>
                 <div className="flex space-x-4">
                   <button className="bg-green-400 text-black px-6 py-2 rounded-full font-semibold hover:bg-green-500 transition duration-300">
-                    START NOW
+                    <Link to="/play">START NOW</Link>
                   </button>
                   <button className="border border-white px-6 py-2 rounded-full font-semibold hover:bg-white hover:text-black transition duration-300">
                     LEARN MORE
