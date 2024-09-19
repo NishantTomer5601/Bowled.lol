@@ -1,8 +1,37 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Search, ShoppingCart, Menu, ArrowLeft, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { auth, onAuthStateChanged } from '../firebase';
+import { signOut } from 'firebase/auth';
 
 function Home() {
+    const [user , setUser] = useState(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            if(currentUser){
+                setUser(currentUser);
+            }
+            else{
+                setUser(null);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const handleLogout =async () => {
+        try{
+            await signOut(auth);
+            setUser(null);
+            Navigate('/');
+        }
+        catch(error){
+            console.log("Logout Failed: ", error);
+        }
+    };
+
+
     return (
         <div className="min-h-screen bg-black text-white relative">
           {/* Background image with overlay */}
@@ -32,9 +61,22 @@ function Home() {
                   <ShoppingCart className="h-6 w-6" />
                   <span className="absolute -top-2 -right-2 bg-red-500 rounded-full w-4 h-4 text-xs flex items-center justify-center">1</span>
                 </div>
-                <Link to="/login" className="text-white hover:text-green-400">Login</Link> {/* Login link */}
-                <Link to="/signup" className="text-white hover:text-green-400">Signup</Link> {/* Signup link */}
-                <Menu className="h-6 w-6 md:hidden" />
+                {user ? (
+                    <div className="flex items-center">
+                        <span className="text-green-400 mr-4">Welcome, {user.displayName || "User"}</span>
+                        <button
+                        onClick={handleLogout}
+                        className="text-red-400 hover:text-red-300 bg-gray-800 px-4 py-2 rounded-md"
+                        >
+                        Logout
+                        </button>
+                    </div>
+                    ) : (
+                    <div>
+                        <Link to="/login" className="text-green-400 hover:text-green-300 mr-4">Sign In</Link>
+                        <Link to="/signup" className="text-green-400 hover:text-green-300">Sign Up</Link>
+                    </div>
+                    )}
               </div>
             </nav>
       

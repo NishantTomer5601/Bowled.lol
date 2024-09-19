@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Login attempted with:', { email, password });
+    setError(null);
+
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            navigate('/');
+            console.log('Login Successfull', user);
+        })
+        .catch((error) => {
+            console.log("Login Failed", error)
+            setError('Invalid email or password');
+        })
   };
 
   return (
