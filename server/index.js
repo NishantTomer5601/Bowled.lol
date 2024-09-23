@@ -27,8 +27,8 @@ app.get('/api/players', express.json(), (req,res) =>{
     res.json(playersData);
 })
 
-app.post('/api/guess', express.json(), (req,res) => {
-    const {guessedPlayerName, targetPlayerName } = req.body;
+app.get('/api/guess',  (req,res) => {
+    const {guessedPlayerName, targetPlayerName } = req.query;
 
     const guessedPlayer = playersData.find(
         (player) => player.name && player.name.toLowerCase() === guessedPlayerName.toLowerCase()

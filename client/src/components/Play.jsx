@@ -9,7 +9,7 @@ function Play() {
     const [guessInput, setGuessInput] = useState('');
     const [guesses, setGuesses] = useState([]);
     const [remainingGuesses, setRemainingGuesses] = useState(5);
-    const targetPlayer = 'Virat Kohli';
+    const targetPlayer = 'AAA Amsterdam';
 
     useEffect(() => {
         axios.get("http://localhost:8000/api/players")
@@ -19,9 +19,11 @@ function Play() {
 
     const handleGuess = () => {
         if(remainingGuesses > 0 && guessInput !== ""){
-            axios.post('http://localhost:8000/api/guess' , {
-                guessedPlayerName : guessInput,
-                targetPlayerName : targetPlayer
+            axios.get('http://localhost:8000/api/guess' , {
+                params: {
+                            guessedPlayerName: guessInput,
+                            targetPlayerName: targetPlayer
+                        }
             })
                 .then(response => {
                     setGuesses([...guesses, response.data]);
