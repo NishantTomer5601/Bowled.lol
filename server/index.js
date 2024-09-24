@@ -25,10 +25,25 @@ fs.readFile('people.csv', 'utf8', (err, data) => {
 
 app.get('/api/players', express.json(), (req,res) =>{
     res.json(playersData);
-})
+});
 
-app.post('/api/guess', express.json(), (req,res) => {
-    const {guessedPlayerName, targetPlayerName } = req.body;
+// Search endpoint for filtering players by name
+app.get('/api/search', (req, res) => {
+    const { query } = req.query;
+
+    if (!query) {
+        return res.json([]); // If no query, return empty array
+    }
+
+    const filteredPlayers = playersData.filter(player => 
+        player.name && player.name.toLowerCase().startsWith(query.toLowerCase())
+    );
+
+    res.json(filteredPlayers);
+});
+
+app.get('/api/guess',  (req,res) => {
+    const {guessedPlayerName, targetPlayerName } = req.query;
 
     const guessedPlayer = playersData.find(
         (player) => player.name && player.name.toLowerCase() === guessedPlayerName.toLowerCase()

@@ -6,12 +6,12 @@ import { getAuth, onAuthStateChanged, GoogleAuthProvider } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyAckcmGGmaYNg1reikA7furgzeY7_uSmwM",
+  authDomain: "bowled-lol.firebaseapp.com",
+  projectId: "bowled-lol",
+  storageBucket: "bowled-lol.appspot.com",
+  messagingSenderId: "859137109390",
+  appId: "1:859137109390:web:946f55f45e95d5fd5108df"
 };
 
 // Initialize Firebase

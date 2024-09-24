@@ -9,7 +9,8 @@ function Play() {
     const [guessInput, setGuessInput] = useState('');
     const [guesses, setGuesses] = useState([]);
     const [remainingGuesses, setRemainingGuesses] = useState(5);
-    const targetPlayer = 'Virat Kohli';
+    const [suggestions, setSuggestions] = useState([]);
+    const targetPlayer = 'AAA Amsterdam';
 
     useEffect(() => {
         axios.get("http://localhost:8000/api/players")
@@ -19,9 +20,11 @@ function Play() {
 
     const handleGuess = () => {
         if(remainingGuesses > 0 && guessInput !== ""){
-            axios.post('http://localhost:8000/api/guess' , {
-                guessedPlayerName : guessInput,
-                targetPlayerName : targetPlayer
+            axios.get('http://localhost:8000/api/guess' , {
+                params: {
+                            guessedPlayerName: guessInput,
+                            targetPlayerName: targetPlayer
+                        }
             })
                 .then(response => {
                     setGuesses([...guesses, response.data]);
@@ -33,6 +36,31 @@ function Play() {
                 });
         }
             
+    };
+
+    const handleSearchInputChange = (e) => {
+        const input = e.target.value;
+        setGuessInput(input);
+
+        if (input.length > 0) {
+            // Call the search API to get suggestions
+            axios.get('http://localhost:8000/api/search', {
+                params: { query: input }
+            })
+                .then(response => {
+                    setSuggestions(response.data);
+                })
+                .catch(error => {
+                    console.error('Error fetching search suggestions', error);
+                });
+        } else {
+            setSuggestions([]);
+        }
+    };
+
+    const handleSuggestionClick = (suggestion) => {
+        setGuessInput(suggestion); 
+        setSuggestions([]); 
     };
 
     return (
@@ -53,14 +81,29 @@ function Play() {
             <p className="text-xl text-center mb-8">Guess the international cricketer</p>
 
             {/* Input Section */}
-            <div className="mb-8">
+            <div className="mb-8 realtive">
             <input
                 type="text"
                 value={guessInput}
-                onChange={(e) => setGuessInput(e.target.value)}
+                onChange={handleSearchInputChange}  // Adding new event handler for search  --> to be implemented
                 placeholder="Guess any player, past, or present!"
                 className="w-full p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
+
+            {/* Dropdown for suggestions */}
+                    {suggestions.length > 0 && (
+                        <div className="absolute w-full bg-white border border-gray-300 rounded-md mt-2 shadow-lg z-10">
+                            {suggestions.map((player, index) => (
+                                <div
+                                    key={index}
+                                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                                    onClick={() => handleSuggestionClick(player.name)}
+                                >
+                                    {player.name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
             <button
                 onClick={handleGuess}
                 className="mt-4 px-4 py-2 bg-green-400 text-white rounded-md hover:bg-green-500"
