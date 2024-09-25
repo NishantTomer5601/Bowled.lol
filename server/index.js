@@ -36,7 +36,7 @@ app.get('/api/search', (req, res) => {
     }
 
     const filteredPlayers = playersData.filter(player => 
-        player.name && player.name.toLowerCase().startsWith(query.toLowerCase())
+        player.fullname && player.fullname.toLowerCase().startsWith(query.toLowerCase())
     );
 
     res.json(filteredPlayers);
@@ -46,11 +46,11 @@ app.get('/api/guess',  (req,res) => {
     const {guessedPlayerName, targetPlayerName } = req.query;
 
     const guessedPlayer = playersData.find(
-        (player) => player.name && player.name.toLowerCase() === guessedPlayerName.toLowerCase()
+        (player) => player.fullname && player.fullname.toLowerCase() === guessedPlayerName.toLowerCase()
     );
 
     const targetPlayer = playersData.find(
-        (player) => player.name && player.name.toLowerCase() === targetPlayerName.toLowerCase()
+        (player) => player.fullname && player.fullname.toLowerCase() === targetPlayerName.toLowerCase()
     );
 
     if(!guessedPlayer || !targetPlayer){
@@ -58,7 +58,7 @@ app.get('/api/guess',  (req,res) => {
     }
 
     const result = {
-        name: guessedPlayer.name,
+        name: guessedPlayer.fullname,
         nation: guessedPlayer.nation === targetPlayer.nation,
         role: guessedPlayer.role === targetPlayer.role,
         retired: guessedPlayer.retired === targetPlayer.retired,

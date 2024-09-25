@@ -10,19 +10,19 @@ function Play() {
     const [guesses, setGuesses] = useState([]);
     const [remainingGuesses, setRemainingGuesses] = useState(5);
     const [suggestions, setSuggestions] = useState([]);
-    const targetPlayer = 'AAA Amsterdam';
+    const targetPlayer = 'Dinesh Karthik';
 
     useEffect(() => {
         axios.get("http://localhost:8000/api/players")
             .then(response => setPlayersData(response.data))
-            .catch(error => console.error('Erroe fetching player data: ',error));
+            .catch(error => console.error('Error fetching player data: ',error));
     }, []);
 
     const handleGuess = () => {
-        if(remainingGuesses > 0 && guessInput !== ""){
+        if(remainingGuesses > 0 && guessInput.trim() !== ""){
             axios.get('http://localhost:8000/api/guess' , {
                 params: {
-                            guessedPlayerName: guessInput,
+                            guessedPlayerName: guessInput.trim(),
                             targetPlayerName: targetPlayer
                         }
             })
@@ -92,14 +92,14 @@ function Play() {
 
             {/* Dropdown for suggestions */}
                     {suggestions.length > 0 && (
-                        <div className="absolute w-full bg-white border border-gray-300 rounded-md mt-2 shadow-lg z-10">
+                        <div className="relative w-full bg-white border border-gray-300 rounded-md mt-2 shadow-lg z-10">
                             {suggestions.map((player, index) => (
                                 <div
                                     key={index}
                                     className="p-2 hover:bg-gray-100 cursor-pointer"
-                                    onClick={() => handleSuggestionClick(player.name)}
+                                    onClick={() => handleSuggestionClick(player.fullname)}
                                 >
-                                    {player.name}
+                                    {player.fullname}
                                 </div>
                             ))}
                         </div>
@@ -138,7 +138,7 @@ function Play() {
             <tbody>
                 {guesses.map((guess, index) => (
                     <tr key={index} className="border-b border-green-300">
-                        <td className="p-2">{guess.name}</td>
+                        <td className="p-2">{guess.fullname}</td>
                         <td className={`p-2 ${guess.nation ? 'bg-green-300' : ''}`}>{guess.nation ? 'Matched' : 'Not Matched'}</td>
                         <td className={`p-2 ${guess.role ? 'bg-green-300' : ''}`}>{guess.role ? 'Matched' : 'Not Matched'}</td>
                         <td className={`p-2 ${guess.retired ? 'bg-green-300' : ''}`}>{guess.retired ? 'Matched' : 'Not Matched'}</td>
