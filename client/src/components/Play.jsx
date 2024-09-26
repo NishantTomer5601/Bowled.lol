@@ -13,7 +13,7 @@ function Play() {
     const [remainingGuesses, setRemainingGuesses] = useState(5);
     const [suggestions, setSuggestions] = useState([]);
     const [showAllSuggestions, setShowAllSuggestions] = useState(false);
-    const [targetPlayer, setTargetPlayer] = useState('');
+    const [targetPlayer, setTargetPlayer] = useState({});
     const [showCongratulations, setShowCongratulations] = useState(false);
     const [playerImagePath, setPlayerImagePath] = useState(''); // State to control congratulations popup
     
@@ -32,11 +32,18 @@ function Play() {
     }, []);
 
     const selectRandomPlayer = () => {
-        if (playersData.length > 0) {
-            const randomIndex = Math.floor(Math.random() * playersData.length);
-            setTargetPlayer(playersData[randomIndex].fullname); // Assuming the fullname field exists
-        }
-    };
+    if (playersData.length > 0) {
+        const randomIndex = Math.floor(Math.random() * playersData.length);
+        const selectedPlayer = playersData[randomIndex];
+        
+        // Set both player name and image URL
+        setTargetPlayer({
+            fullname: selectedPlayer.fullname, // Assuming fullname exists
+            image_path: selectedPlayer.image_path // Assuming image_url exists in the CSV data
+        });
+    }
+};
+
 
     // Update the target player every hour 
     useEffect(() => {
@@ -62,7 +69,7 @@ function Play() {
             axios.get('http://localhost:8000/api/guess' , {
                 params: {
                             guessedPlayerName: guessInput.trim(),
-                            targetPlayerName: targetPlayer
+                            targetPlayerName: targetPlayer.fullname
                         }
             })
                 .then(response => {
@@ -70,8 +77,9 @@ function Play() {
                     setRemainingGuesses(remainingGuesses-1);
                     setGuessInput('');
 
-                    if (response.data.fullname === targetPlayer) {
-                        // Trigger the congratulations card when the guess is correct
+                    if (response.data.fullname === targetPlayer.fullname) {
+                        // Trigger the congratulations card 
+                        setPlayerImagePath(response.data.image_path);
                         setShowCongratulations(true);
                     }
                 })
