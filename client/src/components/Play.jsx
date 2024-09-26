@@ -3,6 +3,8 @@ import { Settings, HelpCircle, Coffee } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import Confetti from 'react-confetti';
+
 
 function Play() {
     const [playersData, setPlayersData] = useState([]);
@@ -10,13 +12,50 @@ function Play() {
     const [guesses, setGuesses] = useState([]);
     const [remainingGuesses, setRemainingGuesses] = useState(5);
     const [suggestions, setSuggestions] = useState([]);
-    const targetPlayer = 'Dinesh Karthik';
+    const [showAllSuggestions, setShowAllSuggestions] = useState(false);
+    const [targetPlayer, setTargetPlayer] = useState('');
+    const [showCongratulations, setShowCongratulations] = useState(false);
+    const [playerImagePath, setPlayerImagePath] = useState(''); // State to control congratulations popup
+    
+   const resetGame = () => {
+        setGuesses([]);
+        setRemainingGuesses(5);
+        setGuessInput('');
+        selectRandomPlayer();  // Select a new random player
+        setShowCongratulations(false);  // Close the congratulations popup
+    };
 
     useEffect(() => {
         axios.get("http://localhost:8000/api/players")
             .then(response => setPlayersData(response.data))
             .catch(error => console.error('Error fetching player data: ',error));
     }, []);
+
+    const selectRandomPlayer = () => {
+        if (playersData.length > 0) {
+            const randomIndex = Math.floor(Math.random() * playersData.length);
+            setTargetPlayer(playersData[randomIndex].fullname); // Assuming the fullname field exists
+        }
+    };
+
+    // Update the target player every hour 
+    useEffect(() => {
+        
+        if (playersData.length > 0) {
+            selectRandomPlayer();
+        }
+
+        // Set interval to update the player every hour
+        const intervalId = setInterval(() => {
+            selectRandomPlayer();
+        }, 3600000); // 1 hour in milliseconds
+
+        // Cleanup the interval when component unmounts
+        return () => clearInterval(intervalId);
+    }, [playersData]); 
+
+
+
 
     const handleGuess = () => {
         if(remainingGuesses > 0 && guessInput.trim() !== ""){
@@ -30,6 +69,11 @@ function Play() {
                     setGuesses([...guesses, response.data]);
                     setRemainingGuesses(remainingGuesses-1);
                     setGuessInput('');
+
+                    if (response.data.fullname === targetPlayer) {
+                        // Trigger the congratulations card when the guess is correct
+                        setShowCongratulations(true);
+                    }
                 })
                 .catch(error => {
                     alert('Player not found')
@@ -65,6 +109,40 @@ function Play() {
 
     return (
         <div className="min-h-screen bg-stone-100 text-stone-800 p-4">
+          {showCongratulations && (
+                <>
+                    {/* Show confetti when correct guess is made */}
+                    <Confetti width={window.innerWidth} height={window.innerHeight} />
+                </>
+            )}
+
+            {/* Show Congratulations Popup */}
+            {showCongratulations && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="relative bg-white p-6 rounded-lg shadow-lg text-center" style={{ maxWidth: '500px', width: '100%' }}>
+                        <div className="congrats-card">
+                            <img 
+                                src={playerImagePath} 
+                                alt="Player" 
+                                className="rounded-full w-32 h-32 mx-auto mb-4 shadow-lg" 
+                            />
+                            <h2 className="text-4xl font-bold text-green-700 mb-4">Congratulations!</h2>
+                            <p className="text-xl mb-6">You guessed the right player!</p>
+                            <button
+                                onClick={resetGame}  // Reset the game when the button is clicked
+                                className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                            >
+                            {/* Background image with fade effect */}
+                            <div className="absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: `url('/path-to-your-background-image.jpg')` }}>
+                            </div>
+                                Play Again
+                            </button>
+
+                            
+                        </div>
+                    </div>
+                </div>
+            )}
         {/* Header Section */}
         <header className="flex justify-between items-center mb-8">
             <nav className="space-x-4">
@@ -77,7 +155,7 @@ function Play() {
 
         {/* Main Section */}
         <main className="max-w-3xl mx-auto">
-            <h1 className="text-5xl font-bold text-center text-green-800 mb-4">STUMPLE</h1>
+            <h1 className="text-5xl font-bold text-center text-green-800 mb-4">BOWLED</h1>
             <p className="text-xl text-center mb-8">Guess the international cricketer</p>
 
             {/* Input Section */}
@@ -91,19 +169,53 @@ function Play() {
             />
 
             {/* Dropdown for suggestions */}
-                    {suggestions.length > 0 && (
-                        <div className="relative w-full bg-white border border-gray-300 rounded-md mt-2 shadow-lg z-10">
-                            {suggestions.map((player, index) => (
-                                <div
-                                    key={index}
-                                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                                    onClick={() => handleSuggestionClick(player.fullname)}
-                                >
-                                    {player.fullname}
-                                </div>
-                            ))}
-                        </div>
-                    )}
+{suggestions.length > 0 && (
+    <div className="relative w-full bg-white border border-gray-300 rounded-md mt-2 shadow-lg z-10">
+        {/* Limit to 5 suggestions */}
+        {suggestions.slice(0, 3).map((player, index) => (
+            <div
+                key={index}
+                className="p-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleSuggestionClick(player.fullname)}
+            >
+                {player.fullname}
+            </div>
+        ))}
+
+        {/* Show "See more" option if there are more than 5 suggestions */}
+        {suggestions.length > 3 && (
+            <div
+                className=" p-2 hover:bg-gray-100 cursor-pointer text-blue-600 font-semibold"
+                onClick={() => setShowAllSuggestions(true)}  // Handler to show all suggestions
+            >
+                <i>See more</i>
+            </div>
+        )}
+
+        {/* If 'See more' is clicked, show all suggestions */}
+        {showAllSuggestions && (
+            suggestions.map((player, index) => (
+                <div
+                    key={index}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleSuggestionClick(player.fullname)}
+                >
+                    {player.fullname}
+                </div>
+            ))
+        )}
+    </div>
+)}
+{showAllSuggestions && (
+    <div
+        className="p-2 hover:bg-gray-100 cursor-pointer text-blue-600 font-semibold"
+        onClick={() => setShowAllSuggestions(false)}  // Handler to hide extra suggestions
+    >
+        See less
+    </div>
+)}
+
+
             <button
                 onClick={handleGuess}
                 className="mt-4 px-4 py-2 bg-green-400 text-white rounded-md hover:bg-green-500"
@@ -126,26 +238,23 @@ function Play() {
             <table className="w-full border-collapse mb-8">
             <thead>
                 <tr className="border-b border-green-300">
+                <th className="p-2 text-left text-green-700">Player</th>
                 <th className="p-2 text-left text-green-700">Nation</th>
                 <th className="p-2 text-left text-green-700">Role</th>
-                <th className="p-2 text-left text-green-700">Retired?</th>
-                <th className="p-2 text-left text-green-700">Born</th>
-                <th className="p-2 text-left text-green-700">Batting Hand</th>
-                <th className="p-2 text-left text-green-700">Total Matches</th>
-                <th className="p-2 text-left text-green-700">Current IPL Team</th>
+                <th className="p-2 text-left text-green-700">DOB/Year</th>
+                <th className="p-2 text-left text-green-700">Batting Style</th>
+                <th className="p-2 text-left text-green-700">Bowling Style</th>
                 </tr>
             </thead>
             <tbody>
                 {guesses.map((guess, index) => (
                     <tr key={index} className="border-b border-green-300">
                         <td className="p-2">{guess.fullname}</td>
-                        <td className={`p-2 ${guess.nation ? 'bg-green-300' : ''}`}>{guess.nation ? 'Matched' : 'Not Matched'}</td>
-                        <td className={`p-2 ${guess.role ? 'bg-green-300' : ''}`}>{guess.role ? 'Matched' : 'Not Matched'}</td>
-                        <td className={`p-2 ${guess.retired ? 'bg-green-300' : ''}`}>{guess.retired ? 'Matched' : 'Not Matched'}</td>
-                        <td className={`p-2 ${guess.born ? 'bg-green-300' : ''}`}>{guess.born ? 'Matched' : 'Not Matched'}</td>
-                        <td className={`p-2 ${guess.battingHand ? 'bg-green-300' : ''}`}>{guess.battingHand ? 'Matched' : 'Not Matched'}</td>
-                        <td className={`p-2 ${guess.totalMatches ? 'bg-green-300' : ''}`}>{guess.totalMatches ? 'Matched' : 'Not Matched'}</td>
-                        <td className={`p-2 ${guess.currentIPLTeam ? 'bg-green-300' : ''}`}>{guess.currentIPLTeam ? 'Matched' : 'Not Matched'}</td>
+                        <td className={`p-2 ${guess.country_name ? 'bg-green-300' : ''}`}>{guess.country_name ? 'Matched' : 'Not Matched'}</td>
+                        <td className={`p-2 ${guess.position ? 'bg-green-300' : ''}`}>{guess.position ? 'Matched' : 'Not Matched'}</td>
+                        <td className={`p-2 ${guess.dateofbirth ? 'bg-green-300' : ''}`}>{guess.dateofbirth ? 'Matched' : 'Not Matched'}</td>
+                        <td className={`p-2 ${guess.battingstyle ? 'bg-green-300' : ''}`}>{guess.battingstyle ? 'Matched' : 'Not Matched'}</td>
+                        <td className={`p-2 ${guess.bowlingstyle ? 'bg-green-300' : ''}`}>{guess.bowlingstyle ? 'Matched' : 'Not Matched'}</td>
                     </tr>
                 ))}
             </tbody>

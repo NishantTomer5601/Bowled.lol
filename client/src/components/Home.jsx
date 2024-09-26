@@ -48,7 +48,7 @@ function Home() {
           <div className="relative z-10">
             {/* Navigation */}
             <nav className="flex justify-between items-center p-4">
-              <div className="text-2xl font-bold">Stumple</div>
+              <div className="text-2xl font-bold">Bowled</div>
               <div className="hidden md:flex space-x-6">
                 <Link to="/" className="text-green-400">Home</Link>
                 <Link to="/shop">Shop</Link>
@@ -87,7 +87,7 @@ function Home() {
                   Guess the Cricketer!<br />
                 </h1>
                 <p className="mb-8 max-w-2xl">
-                    Stumple is a dynamic platform for interactive online game centered around cricket.
+                    Bowled is a dynamic platform for interactive online game centered around cricket.
                 </p>
                 <div className="flex space-x-4">
                   <button className="bg-green-400 text-black px-6 py-2 rounded-full font-semibold hover:bg-green-500 transition duration-300">
@@ -99,6 +99,7 @@ function Home() {
                 </div>
               </div>
             </div>
+            
       
             {/* Navigation Arrows */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">

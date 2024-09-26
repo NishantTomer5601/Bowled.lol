@@ -48,6 +48,8 @@ app.get('/api/guess',  (req,res) => {
     const guessedPlayer = playersData.find(
         (player) => player.fullname && player.fullname.toLowerCase() === guessedPlayerName.toLowerCase()
     );
+    //console.log(guessedPlayer);
+
 
     const targetPlayer = playersData.find(
         (player) => player.fullname && player.fullname.toLowerCase() === targetPlayerName.toLowerCase()
@@ -56,16 +58,16 @@ app.get('/api/guess',  (req,res) => {
     if(!guessedPlayer || !targetPlayer){
         return res.status(400).json({ message: 'Player not found '});
     }
+    // console.log(guessedPlayer);
+    // console.log(targetPlayer);
 
     const result = {
-        name: guessedPlayer.fullname,
-        nation: guessedPlayer.nation === targetPlayer.nation,
-        role: guessedPlayer.role === targetPlayer.role,
-        retired: guessedPlayer.retired === targetPlayer.retired,
-        born: guessedPlayer.born === targetPlayer.born,
-        battingHand: guessedPlayer.battingHand === targetPlayer.battingHand,
-        totalMatches: guessedPlayer.totalMatches === targetPlayer.totalMatches,
-        currentIPLTeam: guessedPlayer.currentIPLTeam === targetPlayer.currentIPLTeam,
+        fullname: guessedPlayer.fullname,
+        country_name: guessedPlayer.country_name === targetPlayer.country_name,
+        position: guessedPlayer.position === targetPlayer.position,
+        dateofbirth: guessedPlayer.dateofbirth === targetPlayer.dateofbirth,
+        battingstyle: guessedPlayer.battingstyle === targetPlayer.battingstyle,
+        bowlingstyle: guessedPlayer.bowlingstyle === targetPlayer.bowlingstyle,
     };
     res.json(result);
 })
