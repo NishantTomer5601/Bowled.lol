@@ -52,7 +52,7 @@ app.get('/api/guess',  (req,res) => {
 
 
     const targetPlayer = playersData.find(
-        (player) => player.fullname && player.fullname.toLowerCase() === targetPlayerName.toLowerCase()
+        (player) => player.fullname && typeof targetPlayerName === 'string' &&  player.fullname.toLowerCase() === targetPlayerName.toLowerCase()
     );
 
     if(!guessedPlayer || !targetPlayer){
@@ -68,6 +68,8 @@ app.get('/api/guess',  (req,res) => {
         dateofbirth: guessedPlayer.dateofbirth === targetPlayer.dateofbirth,
         battingstyle: guessedPlayer.battingstyle === targetPlayer.battingstyle,
         bowlingstyle: guessedPlayer.bowlingstyle === targetPlayer.bowlingstyle,
+        image_path: guessedPlayer.image_path,
+        
     };
     res.json(result);
 })
