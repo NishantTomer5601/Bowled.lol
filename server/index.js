@@ -36,7 +36,7 @@ app.get('/api/search', (req, res) => {
     }
 
     const filteredPlayers = playersData.filter(player => 
-        player.name && player.name.toLowerCase().startsWith(query.toLowerCase())
+        player.fullname && player.fullname.toLowerCase().startsWith(query.toLowerCase())
     );
 
     res.json(filteredPlayers);
@@ -46,26 +46,28 @@ app.get('/api/guess',  (req,res) => {
     const {guessedPlayerName, targetPlayerName } = req.query;
 
     const guessedPlayer = playersData.find(
-        (player) => player.name && player.name.toLowerCase() === guessedPlayerName.toLowerCase()
+        (player) => player.fullname && player.fullname.toLowerCase() === guessedPlayerName.toLowerCase()
     );
+    //console.log(guessedPlayer);
+
 
     const targetPlayer = playersData.find(
-        (player) => player.name && player.name.toLowerCase() === targetPlayerName.toLowerCase()
+        (player) => player.fullname && player.fullname.toLowerCase() === targetPlayerName.toLowerCase()
     );
 
     if(!guessedPlayer || !targetPlayer){
         return res.status(400).json({ message: 'Player not found '});
     }
+    // console.log(guessedPlayer);
+    // console.log(targetPlayer);
 
     const result = {
-        name: guessedPlayer.name,
-        nation: guessedPlayer.nation === targetPlayer.nation,
-        role: guessedPlayer.role === targetPlayer.role,
-        retired: guessedPlayer.retired === targetPlayer.retired,
-        born: guessedPlayer.born === targetPlayer.born,
-        battingHand: guessedPlayer.battingHand === targetPlayer.battingHand,
-        totalMatches: guessedPlayer.totalMatches === targetPlayer.totalMatches,
-        currentIPLTeam: guessedPlayer.currentIPLTeam === targetPlayer.currentIPLTeam,
+        fullname: guessedPlayer.fullname,
+        country_name: guessedPlayer.country_name === targetPlayer.country_name,
+        position: guessedPlayer.position === targetPlayer.position,
+        dateofbirth: guessedPlayer.dateofbirth === targetPlayer.dateofbirth,
+        battingstyle: guessedPlayer.battingstyle === targetPlayer.battingstyle,
+        bowlingstyle: guessedPlayer.bowlingstyle === targetPlayer.bowlingstyle,
     };
     res.json(result);
 })
