@@ -63,40 +63,43 @@ app.get('/api/guess', (req, res) => {
     const guessedPlayer = playersData.find(
         (player) => player.fullname && player.fullname.toLowerCase() === guessedPlayerName.toLowerCase()
     );
+    //console.log(guessedPlayer);
 
-    if (!guessedPlayer) {
-        return res.status(400).json({ message: 'Player not found' });
+
+    const targetPlayer = playersData.find(
+        (player) => player.fullname && typeof targetPlayerName === 'string' &&  player.fullname.toLowerCase() === targetPlayerName.toLowerCase()
+    );
+
+    if(!guessedPlayer || !targetPlayer){
+        return res.status(400).json({ message: 'Player not found '});
     }
+    // console.log(guessedPlayer);
+    // console.log(targetPlayer);
 
     const extractYearFromDate = (dateString) => {
-        if (!dateString) return null;
-        const [day, month, year] = dateString.split("-");
-        return parseInt(year, 10);
-    };
+    if (!dateString) return null; 
+    const [day, month, year] = dateString.split("-"); 
+    return parseInt(year, 10); 
+};
 
-    
     const result = {
-        fullname: guessedPlayer.fullname,
-        country_name: guessedPlayer.country_name,
-        position: guessedPlayer.position,
-        birthyear: extractYearFromDate(guessedPlayer.dateofbirth),
-        battingstyle: guessedPlayer.battingstyle,
-        bowlingstyle: guessedPlayer.bowlingstyle,
-        image_path: guessedPlayer.image_path,
-        country_match: guessedPlayer.country_name === targetPlayer.country_name,
-        position_match: guessedPlayer.position === targetPlayer.position,
-        birthyear_match: extractYearFromDate(guessedPlayer.dateofbirth) === extractYearFromDate(targetPlayer.dateofbirth),
-        battingstyle_match: guessedPlayer.battingstyle === targetPlayer.battingstyle,
-        bowlingstyle_match: guessedPlayer.bowlingstyle === targetPlayer.bowlingstyle,
-    };
+    fullname: guessedPlayer.fullname,
+    country_name: guessedPlayer.country_name,
+    position: guessedPlayer.position,
+    birthyear: extractYearFromDate(guessedPlayer.dateofbirth),
+    battingstyle: guessedPlayer.battingstyle,
+    bowlingstyle: guessedPlayer.bowlingstyle,
+    image_path: guessedPlayer.image_path,
+    country_match: guessedPlayer.country_name === targetPlayer.country_name,
+    position_match: guessedPlayer.position === targetPlayer.position,
+    birthyear_match: extractYearFromDate(guessedPlayer.dateofbirth) === extractYearFromDate(targetPlayer.dateofbirth),
+    battingstyle_match: guessedPlayer.battingstyle === targetPlayer.battingstyle,
+    bowlingstyle_match: guessedPlayer.bowlingstyle === targetPlayer.bowlingstyle,
+};
 
     res.json(result);
-});
+})
 
-app.get('/api/reset', (req, res) => {
-    selectRandomTargetPlayer();
-    res.json({ message: 'New target player selected' });
-});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
