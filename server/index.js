@@ -2,74 +2,101 @@ const express = require('express');
 const fs = require('fs');
 const Papa = require('papaparse');
 const cors = require('cors');
-const app =  express();
+const app = express();
 
 const PORT = 8000;
 
 app.use(cors());
 
 let playersData = [];
+let targetPlayer = {}; 
+
+
 fs.readFile('people.csv', 'utf8', (err, data) => {
-    if(err){
-        console.log('Error Reading CSV file', err);
+    if (err) {
+        console.log('Error reading CSV file', err);
         return;
     }
 
     Papa.parse(data, {
-        header : true,
+        header: true,
         complete: (results) => {
             playersData = results.data;
+            selectRandomTargetPlayer(); 
         },
     });
 });
 
-app.get('/api/players', express.json(), (req,res) =>{
+
+const selectRandomTargetPlayer = () => {
+    const randomIndex = Math.floor(Math.random() * playersData.length);
+    targetPlayer = playersData[randomIndex];
+    console.log(`Selected target player: ${targetPlayer.fullname}`);
+};
+
+
+app.get('/api/players', express.json(), (req, res) => {
     res.json(playersData);
 });
 
-// Search endpoint for filtering players by name
+
 app.get('/api/search', (req, res) => {
     const { query } = req.query;
 
     if (!query) {
-        return res.json([]); // If no query, return empty array
+        return res.json([]); 
     }
 
-    const filteredPlayers = playersData.filter(player => 
-        player.fullname && player.fullname.toLowerCase().startsWith(query.toLowerCase())
-    );
+    
+    const filteredPlayers = playersData
+        .filter(player => player.fullname && player.fullname.toLowerCase().startsWith(query.toLowerCase()))
+        .map(player => ({
+            fullname: player.fullname 
+        }));
 
     res.json(filteredPlayers);
 });
 
-app.get('/api/guess',  (req,res) => {
-    const {guessedPlayerName, targetPlayerName } = req.query;
+app.get('/api/guess', (req, res) => {
+    const { guessedPlayerName } = req.query;
 
     const guessedPlayer = playersData.find(
         (player) => player.fullname && player.fullname.toLowerCase() === guessedPlayerName.toLowerCase()
     );
 
-    const targetPlayer = playersData.find(
-        (player) => player.fullname && player.fullname.toLowerCase() === targetPlayerName.toLowerCase()
-    );
-
-    if(!guessedPlayer || !targetPlayer){
-        return res.status(400).json({ message: 'Player not found '});
+    if (!guessedPlayer) {
+        return res.status(400).json({ message: 'Player not found' });
     }
 
-    const result = {
-        name: guessedPlayer.fullname,
-        nation: guessedPlayer.nation === targetPlayer.nation,
-        role: guessedPlayer.role === targetPlayer.role,
-        retired: guessedPlayer.retired === targetPlayer.retired,
-        born: guessedPlayer.born === targetPlayer.born,
-        battingHand: guessedPlayer.battingHand === targetPlayer.battingHand,
-        totalMatches: guessedPlayer.totalMatches === targetPlayer.totalMatches,
-        currentIPLTeam: guessedPlayer.currentIPLTeam === targetPlayer.currentIPLTeam,
+    const extractYearFromDate = (dateString) => {
+        if (!dateString) return null;
+        const [day, month, year] = dateString.split("-");
+        return parseInt(year, 10);
     };
-    res.json(result);
-})
 
+    
+    const result = {
+        fullname: guessedPlayer.fullname,
+        country_name: guessedPlayer.country_name,
+        position: guessedPlayer.position,
+        birthyear: extractYearFromDate(guessedPlayer.dateofbirth),
+        battingstyle: guessedPlayer.battingstyle,
+        bowlingstyle: guessedPlayer.bowlingstyle,
+        image_path: guessedPlayer.image_path,
+        country_match: guessedPlayer.country_name === targetPlayer.country_name,
+        position_match: guessedPlayer.position === targetPlayer.position,
+        birthyear_match: extractYearFromDate(guessedPlayer.dateofbirth) === extractYearFromDate(targetPlayer.dateofbirth),
+        battingstyle_match: guessedPlayer.battingstyle === targetPlayer.battingstyle,
+        bowlingstyle_match: guessedPlayer.bowlingstyle === targetPlayer.bowlingstyle,
+    };
+
+    res.json(result);
+});
+
+app.get('/api/reset', (req, res) => {
+    selectRandomTargetPlayer();
+    res.json({ message: 'New target player selected' });
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
