@@ -117,6 +117,7 @@ function Play() {
 
     return (
         <div className="min-h-screen bg-stone-100 text-stone-800 p-4">
+            
           {showCongratulations && (
                 <>
                     {/* Show confetti when correct guess is made */}
