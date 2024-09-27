@@ -61,16 +61,27 @@ app.get('/api/guess',  (req,res) => {
     // console.log(guessedPlayer);
     // console.log(targetPlayer);
 
+    const extractYearFromDate = (dateString) => {
+    if (!dateString) return null; 
+    const [day, month, year] = dateString.split("-"); 
+    return parseInt(year, 10); 
+};
+
     const result = {
-        fullname: guessedPlayer.fullname,
-        country_name: guessedPlayer.country_name === targetPlayer.country_name,
-        position: guessedPlayer.position === targetPlayer.position,
-        dateofbirth: guessedPlayer.dateofbirth === targetPlayer.dateofbirth,
-        battingstyle: guessedPlayer.battingstyle === targetPlayer.battingstyle,
-        bowlingstyle: guessedPlayer.bowlingstyle === targetPlayer.bowlingstyle,
-        image_path: guessedPlayer.image_path,
-        
-    };
+    fullname: guessedPlayer.fullname,
+    country_name: guessedPlayer.country_name,
+    position: guessedPlayer.position,
+    birthyear: extractYearFromDate(guessedPlayer.dateofbirth),
+    battingstyle: guessedPlayer.battingstyle,
+    bowlingstyle: guessedPlayer.bowlingstyle,
+    image_path: guessedPlayer.image_path,
+    country_match: guessedPlayer.country_name === targetPlayer.country_name,
+    position_match: guessedPlayer.position === targetPlayer.position,
+    birthyear_match: extractYearFromDate(guessedPlayer.dateofbirth) === extractYearFromDate(targetPlayer.dateofbirth),
+    battingstyle_match: guessedPlayer.battingstyle === targetPlayer.battingstyle,
+    bowlingstyle_match: guessedPlayer.bowlingstyle === targetPlayer.bowlingstyle,
+};
+
     res.json(result);
 })
 
