@@ -39,6 +39,11 @@ app.get('/api/players', express.json(), (req, res) => {
     res.json(playersData);
 });
 
+app.get('/api/target-player',(req, res) => {
+    console.log(targetPlayer.fullname);
+    res.json(targetPlayer);
+});
+
 
 app.get('/api/search', (req, res) => {
     const { query } = req.query;

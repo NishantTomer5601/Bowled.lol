@@ -49,7 +49,7 @@ export default function SignupPage() {
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Navigation */}
       <nav className="flex justify-between items-center p-4">
-        <Link to="/" className="text-2xl font-bold">Stumple</Link>
+        <Link to="/" className="text-2xl font-bold">Bowled</Link>
         <Link to="/" className="text-green-400 hover:text-green-300">Back to Home</Link>
       </nav>
 
@@ -59,7 +59,7 @@ export default function SignupPage() {
         <div className="md:w-1/2 relative">
           <img
             src="https://pbs.twimg.com/media/FwbX_g1akAEZaS9.jpg:large"
-            alt="Gym equipment"
+            alt="Signup Page"
             className="absolute inset-0 w-full h-full object-cover brightness-50"
           />
           <div className="absolute inset-0 flex items-center justify-center">

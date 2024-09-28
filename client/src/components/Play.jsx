@@ -15,14 +15,19 @@ function Play() {
     const [playerImagePath, setPlayerImagePath] = useState(''); 
     const [popupVisible, setPopupVisible] = useState(true);
     const [isGameClosed, setIsGameClosed] = useState(false);
+    const [showFailurePopup, setShowFailurePopup] = useState(false);
+     const [correctPlayer, setCorrectPlayer] = useState({});
+    
     
     const resetGame = () => {
         setGuesses([]);
         setRemainingGuesses(5);
         setGuessInput('');
         setShowCongratulations(false);
+        setShowFailurePopup(false);
         setPopupVisible(true);
         setIsGameClosed(false);
+        setCorrectPlayer(null);
 
         axios.get('http://localhost:8000/api/reset')
             .then(() => console.log("New target player selected"))
@@ -52,6 +57,18 @@ function Play() {
                 setShowCongratulations(true);
                 setPopupVisible(true);
             }
+
+            if (remainingGuesses - 1 === 0 && !showCongratulations) {
+            axios.get('http://localhost:8000/api/target-player')
+              .then(res => {
+                setCorrectPlayer(res.data); // Set the correct player details
+                setShowFailurePopup(true);  // Show failure popup with correct player info
+                setIsGameClosed(true);      // Close the game and prevent further guessing
+              })
+              .catch(error => console.error('Error fetching correct player:', error));
+          }
+
+
         })
         .catch(error => alert('Player not found'));
     }
@@ -110,6 +127,29 @@ function Play() {
                     </div>
                 </div>
             )}
+
+            {/* Failure Popup */}
+      {showFailurePopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="relative bg-white p-6 rounded-lg shadow-lg text-center" style={{ maxWidth: '500px', width: '100%' }}>
+            {correctPlayer && (
+              <>
+                <img src={correctPlayer.image_path} alt="Player" className="rounded-full w-32 h-32 mx-auto mb-4 shadow-lg" />
+                <h2 className="text-4xl font-bold text-red-700 mb-4">Game Over!</h2>
+                <p className="text-xl mb-6">The correct player was: <span className="font-bold">{correctPlayer.fullname}</span></p>
+              </>
+            )}
+
+            <button
+              onClick={resetGame}
+              className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            >
+              Play Again
+            </button>
+          </div>
+        </div>
+      )}
+
             {/* Header Section */}
         <header className="flex justify-between items-center mb-8">
             <nav className="space-x-4">
