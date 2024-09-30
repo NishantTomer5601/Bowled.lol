@@ -59,25 +59,32 @@ const startHourlyRefresh = () => {
 };
 
 startHourlyRefresh();
+const ArchiveSave={
+        fullname: targetPlayer.fullname,
+        country_name: targetPlayer.country_name,
+        position: targetPlayer.position,
+        dateofbirth: targetPlayer.dateofbirth,
+        battingstyle: targetPlayer.battingstyle,
+        bowlingstyle: targetPlayer.bowlingstyle,
+        image_path: targetPlayer.image_path
+      }
 
 if (currentHour === 7) {
     const today = now.toISOString().split('T')[0];
 
     const dailyArchive = new DailyArchive({
       date: today,
-      target_player: targetPlayer
+      target_player: ArchiveSave
     });
 
-    dailyArchive.save((err) => {
-      if (err) {
-        console.error('Error saving daily archive player:', err);
-      } else {
-        console.log(`Archived daily player for ${today} at 15:00.`);
-      }
-    });
-  }
-
-
+    dailyArchive.save()
+  .then(() => {
+    console.log(`Archived daily player for ${today} at 7:00 AM.`);
+  })
+  .catch(err => {
+    console.error('Error saving daily archive player:', err);
+  });
+}
 
 
 app.get('/api/players', express.json(), (req, res) => {

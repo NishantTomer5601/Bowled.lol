@@ -20,23 +20,21 @@ function Archive() {
     const [showFailurePopup, setShowFailurePopup] = useState(false);
     const [correctPlayer, setCorrectPlayer] = useState({});
 
-    // Fetch available dates from the archive on component mount
     useEffect(() => {
-        axios.get('http://localhost:8000/api/archive')  // Adjust endpoint if needed
+        axios.get('http://localhost:8000/api/archive')  
             .then(response => setAvailableDates(response.data))
             .catch(error => console.error('Error fetching available archive dates:', error));
     }, []);
 
-    // Fetch the archived player for the selected date
     const handleDateSelection = () => {
         if (selectedDate) {
             axios.get('http://localhost:8000/api/archive-player', {
                 params: { date: selectedDate }
             })
             .then(response => {
-                setArchivedPlayer(response.data); // Set the player for that date
-                setPlayerImagePath(response.data.image_path); // Set player image
-                resetGame(); // Reset the game with a new player
+                setArchivedPlayer(response.data); 
+                setPlayerImagePath(response.data.image_path); 
+                resetGame(); 
             })
             .catch(error => console.error('Error fetching archived player:', error));
         }
@@ -54,37 +52,36 @@ function Archive() {
     };
 
     const handleGuess = () => {
-        if (remainingGuesses > 0 && guessInput.trim() !== "") {
-            // Check if the guessed player is the archived player
-            const guessedPlayer = archivedPlayer; // We are comparing against the archived player only
-
-            const countryMatch = guessedPlayer.country_name === archivedPlayer.country_name;
-            const positionMatch = guessedPlayer.position === archivedPlayer.position;
-            const birthyearMatch = guessedPlayer.dateofbirth === archivedPlayer.dateofbirth;
-            const battingStyleMatch = guessedPlayer.battingstyle === archivedPlayer.battingstyle;
-            const bowlingStyleMatch = guessedPlayer.bowlingstyle === archivedPlayer.bowlingstyle;
-
-            setGuesses([...guesses, guessedPlayer]);
+    if (remainingGuesses > 0 && guessInput.trim() !== "") {
+        axios.get('http://localhost:8000/api/guess', {
+            params: { guessedPlayerName: guessInput.trim() }
+        })
+        .then(response => {
+            setGuesses([...guesses, response.data]);
             setRemainingGuesses(remainingGuesses - 1);
             setGuessInput('');
 
-            // Check if guess is completely correct
-            if (
-                guessedPlayer.fullname.toLowerCase() === archivedPlayer.fullname.toLowerCase() &&
-                countryMatch && positionMatch && birthyearMatch && battingStyleMatch && bowlingStyleMatch
-            ) {
+            if (response.data.fullname === guessInput.trim() && response.data.country_match && response.data.position_match && response.data.birthyear_match && response.data.battingstyle_match && response.data.bowlingstyle_match) {
+                setPlayerImagePath(response.data.image_path);
                 setShowCongratulations(true);
                 setPopupVisible(true);
             }
 
-            // If out of guesses and game is not won, show failure popup
             if (remainingGuesses - 1 === 0 && !showCongratulations) {
-                setCorrectPlayer(archivedPlayer);
-                setShowFailurePopup(true);
-                setIsGameClosed(true);
-            }
-        }
-    };
+            axios.get('http://localhost:8000/api/target-player')
+              .then(res => {
+                setCorrectPlayer(res.data); 
+                setShowFailurePopup(true);  
+                setIsGameClosed(true);      
+              })
+              .catch(error => console.error('Error fetching correct player:', error));
+          }
+
+ 
+        })
+        .catch(error => alert('Player not found'));
+    }
+};
 
     const handleSearchInputChange = (e) => {
         const input = e.target.value;
