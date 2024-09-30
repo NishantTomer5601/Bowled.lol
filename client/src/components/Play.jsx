@@ -68,7 +68,7 @@ function Play() {
               .catch(error => console.error('Error fetching correct player:', error));
           }
 
-
+ 
         })
         .catch(error => alert('Player not found'));
     }
@@ -99,6 +99,7 @@ function Play() {
         <div className="min-h-screen bg-stone-100 text-stone-800 p-4">
             {showCongratulations && (
                 <Confetti width={window.innerWidth} height={window.innerHeight} />
+                
             )}
             {showCongratulations && popupVisible && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -109,7 +110,7 @@ function Play() {
                         
                         {/* Close button */}
                         <button
-                            onClick={() => {
+                            onClick={() => { {resetGame};
                                 setPopupVisible(false);
                                 setIsGameClosed(true);  // Disable further guesses when the user closes the popup
                             }}
@@ -127,6 +128,8 @@ function Play() {
                     </div>
                 </div>
             )}
+
+             
 
             {/* Failure Popup */}
       {showFailurePopup && (
@@ -236,11 +239,14 @@ function Play() {
             <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-2 rounded-md mb-4">
             <span className="font-bold">NEW FEATURE!</span> Play past Stumple games in the <Link to="/archive" className="text-green-700 hover:underline">Archive</Link>
             </div>
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-2 rounded-md mb-4">
+            <span className="font-bold">New mystery player every hour! Keep Bowling every Hour!!!</span> 
+            </div>
 
             {/* Help Section */}
-            <p className="text-center mb-8">
+            {/* <p className="text-center mb-8">
             After a guess, click/hover on the [<HelpCircle className="inline w-4 h-4" />] in any yellow or blank square for help <span className="text-green-700">(disable in settings)</span>
-            </p>
+            </p> */}
 
             {/* Table Section */}
             <table className="w-full border-collapse mb-8">
@@ -286,6 +292,7 @@ function Play() {
             </tbody>
             </table>
             <p>{remainingGuesses} guesses remaining</p>
+            
         </main>
 
         {/* Footer Section */}

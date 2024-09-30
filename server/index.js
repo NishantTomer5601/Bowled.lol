@@ -1,15 +1,24 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const fs = require('fs');
 const Papa = require('papaparse');
 const cors = require('cors');
 const app = express();
+const DailyArchive = require('./models/DailyArchive');
+require('dotenv').config();
 
 const PORT = 8000;
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Could not connect to MongoDB', err));
 
 app.use(cors());
 
 let playersData = [];
 let targetPlayer = {}; 
+const HOUR_IN_MS = 3600 * 1000; 
+const now = new Date();
+const currentHour = now.getHours();
 
 
 fs.readFile('people.csv', 'utf8', (err, data) => {
@@ -26,13 +35,49 @@ fs.readFile('people.csv', 'utf8', (err, data) => {
         },
     });
 });
-
-
 const selectRandomTargetPlayer = () => {
     const randomIndex = Math.floor(Math.random() * playersData.length);
     targetPlayer = playersData[randomIndex];
     console.log(`Selected target player: ${targetPlayer.fullname}`);
 };
+let ans=0;
+const timeUntilNextHour = () => {
+    const now = new Date();
+    const nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 0, 0); // Next hour at exactly :00
+    
+    ans=nextHour-now;
+    
+    return ans;
+};
+
+const startHourlyRefresh = () => {
+    setTimeout(() => {
+        selectRandomTargetPlayer();
+        
+        setInterval(selectRandomTargetPlayer, HOUR_IN_MS);
+    }, timeUntilNextHour());
+};
+
+startHourlyRefresh();
+
+if (currentHour === 7) {
+    const today = now.toISOString().split('T')[0];
+
+    const dailyArchive = new DailyArchive({
+      date: today,
+      target_player: targetPlayer
+    });
+
+    dailyArchive.save((err) => {
+      if (err) {
+        console.error('Error saving daily archive player:', err);
+      } else {
+        console.log(`Archived daily player for ${today} at 15:00.`);
+      }
+    });
+  }
+
+
 
 
 app.get('/api/players', express.json(), (req, res) => {
@@ -102,6 +147,33 @@ app.get('/api/reset', (req, res) => {
     selectRandomTargetPlayer();
     res.json({ message: 'New target player selected' });
 });
+
+app.get('/api/archive-player', (req, res) => {
+  const { date } = req.query;
+
+  DailyArchive.findOne({ date })
+    .then(player => {
+      if (!player) {
+        return res.status(404).json({ message: 'No archived player found for this date.' });
+      }
+      res.json(player.target_player);
+    })
+    .catch(err => {
+      res.status(500).json({ message: 'Error fetching archived player.' });
+    });
+});
+
+
+app.get('/api/archive', (req, res) => {
+  DailyArchive.find({}, 'date')
+    .then(archives => {
+      res.json(archives);
+    })
+    .catch(err => {
+      res.status(500).json({ message: 'Error fetching archive data.' });
+    });
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
