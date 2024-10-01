@@ -5,14 +5,23 @@ const Papa = require('papaparse');
 const cors = require('cors');
 const app = express();
 const DailyArchive = require('./models/DailyArchive');
+const Feedback = require('./models/Feedback')
 require('dotenv').config();
+const bodyParser = require('body-parser');
 
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  methods: ['GET', 'POST'],        
+  credentials: true,               
+}));
+
+app.use(bodyParser.json());
 const PORT = 8000;
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
 
-app.use(cors());
+
 
 let playersData = [];
 let targetPlayer = {}; 
@@ -31,6 +40,7 @@ fs.readFile('people.csv', 'utf8', (err, data) => {
         header: true,
         complete: (results) => {
             playersData = results.data;
+            // console.log('Players data loaded:', playersData);
             selectRandomTargetPlayer(); 
         },
     });
@@ -59,7 +69,15 @@ const startHourlyRefresh = () => {
 };
 
 startHourlyRefresh();
-const ArchiveSave={
+
+
+if (currentHour === 7) {
+    const today = now.toISOString().split('T')[0];
+    if (!targetPlayer || !targetPlayer.fullname) {
+            console.error("No target player selected. Cannot archive.");
+            return;  // Abort the archive process if targetPlayer is not selected
+        }
+    const ArchiveSave={
         fullname: targetPlayer.fullname,
         country_name: targetPlayer.country_name,
         position: targetPlayer.position,
@@ -68,14 +86,13 @@ const ArchiveSave={
         bowlingstyle: targetPlayer.bowlingstyle,
         image_path: targetPlayer.image_path
       }
-
-if (currentHour === 7) {
-    const today = now.toISOString().split('T')[0];
-
+      console.log('Saving target player data: ', ArchiveSave); 
     const dailyArchive = new DailyArchive({
       date: today,
       target_player: ArchiveSave
     });
+    // console.log('Saving target player data: ', ArchiveSave);
+
 
     dailyArchive.save()
   .then(() => {
@@ -179,6 +196,17 @@ app.get('/api/archive', (req, res) => {
     .catch(err => {
       res.status(500).json({ message: 'Error fetching archive data.' });
     });
+});
+
+app.post('/api/feedback', async (req, res) => {
+  const { feedback } = req.body;
+  try {
+    const newFeedback = new Feedback({ feedback });
+    await newFeedback.save();
+    res.status(201).json({ message: 'Feedback submitted successfully!' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to submit feedback' });
+  }
 });
 
 

@@ -6,6 +6,7 @@ import Signup from './components/Signup';
 import Home from './components/Home';
 import Play from './components/Play';
 import Archive from './components/Archive';
+import Feedbackpage from './components/FeedbackPage';
 
 function App() {
   return (
@@ -15,7 +16,8 @@ function App() {
         <Route path="/login" element={<Login />} /> 
         <Route path="/signup" element={<Signup />} /> 
         <Route path='/play' element={<Play />} />  
-        <Route path='/archive' element={<Archive />} />  
+        <Route path='/archive' element={<Archive />} />
+        <Route path="/feedback" element={<Feedbackpage />} />  
       </Routes>
     </>
   );

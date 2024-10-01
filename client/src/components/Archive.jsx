@@ -274,9 +274,14 @@ function Archive() {
             <footer className="text-center mt-8">
                 <p>
                     Enjoying Stumple?{' '}
-                    <Link to="/donate" className="text-green-700 hover:underline">
-                        Buy us a <Coffee className="inline w-4 h-4" />
-                    </Link>{' '}
+                    <a
+            href="https://www.buymeacoffee.com/bowled"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-green-700 hover:underline"
+        >
+            Buy us a <Coffee className="inline w-4 h-4" />
+        </a>{' '}
                     |{' '}
                     <Link to="/feedback" className="text-green-700 hover:underline">
                         Give us feedback!

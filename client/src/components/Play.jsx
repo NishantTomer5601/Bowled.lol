@@ -34,14 +34,12 @@ function Play() {
             .catch(error => console.error('Error resetting game', error));
     };
 
-    // Fetch all players data on component mount
     useEffect(() => {
         axios.get("http://localhost:8000/api/players")
             .then(response => setPlayersData(response.data))
             .catch(error => console.error('Error fetching player data:', error));
     }, []);
 
-    // Handle player guess
     const handleGuess = () => {
     if (remainingGuesses > 0 && guessInput.trim() !== "") {
         axios.get('http://localhost:8000/api/guess', {
@@ -61,9 +59,9 @@ function Play() {
             if (remainingGuesses - 1 === 0 && !showCongratulations) {
             axios.get('http://localhost:8000/api/target-player')
               .then(res => {
-                setCorrectPlayer(res.data); // Set the correct player details
-                setShowFailurePopup(true);  // Show failure popup with correct player info
-                setIsGameClosed(true);      // Close the game and prevent further guessing
+                setCorrectPlayer(res.data); 
+                setShowFailurePopup(true);  
+                setIsGameClosed(true);      
               })
               .catch(error => console.error('Error fetching correct player:', error));
           }
@@ -112,7 +110,7 @@ function Play() {
                         <button
                             onClick={() => { {resetGame};
                                 setPopupVisible(false);
-                                setIsGameClosed(true);  // Disable further guesses when the user closes the popup
+                                setIsGameClosed(true);  
                             }}
                             className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 mr-4"  // Red background and margin-right for spacing
                         >
@@ -237,7 +235,7 @@ function Play() {
 
             {/* New Feature Section */}
             <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-2 rounded-md mb-4">
-            <span className="font-bold">NEW FEATURE!</span> Play past Stumple games in the <Link to="/archive" className="text-green-700 hover:underline">Archive</Link>
+            <span className="font-bold">NEW FEATURE!</span> Play past Bowled games in the <Link to="/archive" className="text-green-700 hover:underline">Archive</Link>
             </div>
             <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-2 rounded-md mb-4">
             <span className="font-bold">New mystery player every hour! Keep Bowling every Hour!!!</span> 
@@ -298,10 +296,15 @@ function Play() {
         {/* Footer Section */}
         <footer className="text-center mt-8">
             <p>
-            Enjoying Stumple?{' '}
-            <Link to="/donate" className="text-green-700 hover:underline">
-                Buy us a <Coffee className="inline w-4 h-4" />
-            </Link>{' '}
+            Enjoying Bowled?{' '}
+            <a
+            href="https://www.buymeacoffee.com/bowled"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-green-700 hover:underline"
+        >
+            Buy us a <Coffee className="inline w-4 h-4" />
+        </a>{' '}
             |{' '}
             <Link to="/feedback" className="text-green-700 hover:underline">
                 Give us feedback!
