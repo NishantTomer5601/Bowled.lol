@@ -4,6 +4,7 @@ const fs = require('fs');
 const Papa = require('papaparse');
 const cors = require('cors');
 const app = express();
+
 const DailyArchive = require('./models/DailyArchive');
 const Feedback = require('./models/Feedback')
 require('dotenv').config();
@@ -16,6 +17,7 @@ app.use(cors({
 }));
 
 app.use(bodyParser.json());
+
 const PORT = 8000;
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
@@ -30,6 +32,7 @@ const now = new Date();
 const currentHour = now.getHours();
 
 
+
 fs.readFile('people.csv', 'utf8', (err, data) => {
     if (err) {
         console.log('Error reading CSV file', err);
@@ -40,7 +43,7 @@ fs.readFile('people.csv', 'utf8', (err, data) => {
         header: true,
         complete: (results) => {
             playersData = results.data;
-            // console.log('Players data loaded:', playersData);
+
             selectRandomTargetPlayer(); 
         },
     });
@@ -107,7 +110,6 @@ if (currentHour === 7) {
 app.get('/api/players', express.json(), (req, res) => {
     res.json(playersData);
 });
-
 app.get('/api/target-player',(req, res) => {
     console.log(targetPlayer.fullname);
     res.json(targetPlayer);
