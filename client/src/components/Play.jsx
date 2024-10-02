@@ -3,10 +3,6 @@ import { Settings, HelpCircle, Coffee } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Confetti from 'react-confetti';
-<<<<<<< HEAD
-=======
-
->>>>>>> upstream/main
 
 function Play() {
     const [playersData, setPlayersData] = useState([]);
