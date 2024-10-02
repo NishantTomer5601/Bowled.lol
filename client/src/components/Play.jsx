@@ -3,6 +3,10 @@ import { Settings, HelpCircle, Coffee } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Confetti from 'react-confetti';
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/main
 
 function Play() {
     const [playersData, setPlayersData] = useState([]);
@@ -11,6 +15,7 @@ function Play() {
     const [remainingGuesses, setRemainingGuesses] = useState(5);
     const [suggestions, setSuggestions] = useState([]);
     const [showAllSuggestions, setShowAllSuggestions] = useState(false);
+
     const [showCongratulations, setShowCongratulations] = useState(false);
     const [playerImagePath, setPlayerImagePath] = useState(''); 
     const [popupVisible, setPopupVisible] = useState(true);
@@ -32,6 +37,7 @@ function Play() {
         axios.get('http://localhost:8000/api/reset')
             .then(() => console.log("New target player selected"))
             .catch(error => console.error('Error resetting game', error));
+
     };
 
     useEffect(() => {
@@ -39,6 +45,39 @@ function Play() {
             .then(response => setPlayersData(response.data))
             .catch(error => console.error('Error fetching player data:', error));
     }, []);
+
+    const selectRandomPlayer = () => {
+    if (playersData.length > 0) {
+        const randomIndex = Math.floor(Math.random() * playersData.length);
+        const selectedPlayer = playersData[randomIndex];
+        
+        
+        setTargetPlayer({
+            fullname: selectedPlayer.fullname, 
+            image_path: selectedPlayer.image_path 
+        });
+    }
+};
+
+
+    // Update the target player every hour 
+    useEffect(() => {
+        
+        if (playersData.length > 0) {
+            selectRandomPlayer();
+        }
+
+        // Set interval to update the player every hour
+        const intervalId = setInterval(() => {
+            selectRandomPlayer();
+        }, 3600000);
+
+        // Cleanup the interval when component unmounts
+        return () => clearInterval(intervalId);
+    }, [playersData]); 
+
+
+
 
     const handleGuess = () => {
     if (remainingGuesses > 0 && guessInput.trim() !== "") {
@@ -73,6 +112,7 @@ function Play() {
 };
 
 
+
     const handleSearchInputChange = (e) => {
     const input = e.target.value;
     setGuessInput(input);
@@ -88,6 +128,7 @@ function Play() {
 };
 
 
+
     const handleSuggestionClick = (suggestion) => {
         setGuessInput(suggestion); 
         setSuggestions([]);
@@ -95,6 +136,7 @@ function Play() {
 
     return (
         <div className="min-h-screen bg-stone-100 text-stone-800 p-4">
+
             {showCongratulations && (
                 <Confetti width={window.innerWidth} height={window.innerHeight} />
                 
@@ -152,6 +194,7 @@ function Play() {
       )}
 
             {/* Header Section */}
+
         <header className="flex justify-between items-center mb-8">
             <nav className="space-x-4">
             <Link to="/how-to-play" className="text-green-700 hover:underline">HOW TO PLAY</Link>
