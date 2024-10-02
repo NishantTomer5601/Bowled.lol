@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Confetti from 'react-confetti';
 
-import Confetti from 'react-confetti';
-
 function Play() {
     const [playersData, setPlayersData] = useState([]);
     const [guessInput, setGuessInput] = useState('');
@@ -13,16 +11,29 @@ function Play() {
     const [remainingGuesses, setRemainingGuesses] = useState(5);
     const [suggestions, setSuggestions] = useState([]);
     const [showAllSuggestions, setShowAllSuggestions] = useState(false);
-    const [targetPlayer, setTargetPlayer] = useState({});
+
     const [showCongratulations, setShowCongratulations] = useState(false);
     const [playerImagePath, setPlayerImagePath] = useState(''); 
+    const [popupVisible, setPopupVisible] = useState(true);
+    const [isGameClosed, setIsGameClosed] = useState(false);
+    const [showFailurePopup, setShowFailurePopup] = useState(false);
+     const [correctPlayer, setCorrectPlayer] = useState({});
     
-   const resetGame = () => {
+    
+    const resetGame = () => {
         setGuesses([]);
         setRemainingGuesses(5);
         setGuessInput('');
-        selectRandomPlayer();  
-        setShowCongratulations(false);  
+        setShowCongratulations(false);
+        setShowFailurePopup(false);
+        setPopupVisible(true);
+        setIsGameClosed(false);
+        setCorrectPlayer(null);
+
+        axios.get('http://localhost:8000/api/reset')
+            .then(() => console.log("New target player selected"))
+            .catch(error => console.error('Error resetting game', error));
+
     };
 
     const [showAllSuggestions, setShowAllSuggestions] = useState(false);
@@ -86,30 +97,6 @@ function Play() {
 
     // Handle player guess
     const handleGuess = () => {
-        if(remainingGuesses > 0 && guessInput.trim() !== ""){
-            axios.get('http://localhost:8000/api/guess' , {
-                params: {
-                            guessedPlayerName: guessInput.trim(),
-                            targetPlayerName: targetPlayer.fullname
-                        }
-            })
-                .then(response => {
-                    setGuesses([...guesses, response.data]);
-                    setRemainingGuesses(remainingGuesses-1);
-                    setGuessInput('');
-
-                    if (response.data.fullname === targetPlayer.fullname) {
-                        // will trigger the congratulations card 
-                        setPlayerImagePath(response.data.image_path);
-                        setShowCongratulations(true);
-                    }
-                })
-                .catch(error => {
-                    alert('Player not found')
-                });
-        }
-            
-    };
     if (remainingGuesses > 0 && guessInput.trim() !== "") {
         axios.get('http://localhost:8000/api/guess', {
             params: { guessedPlayerName: guessInput.trim() }
@@ -124,31 +111,31 @@ function Play() {
                 setShowCongratulations(true);
                 setPopupVisible(true);
             }
+
+
+            if (remainingGuesses - 1 === 0 && !showCongratulations) {
+            axios.get('http://localhost:8000/api/target-player')
+              .then(res => {
+                setCorrectPlayer(res.data); 
+                setShowFailurePopup(true);  
+                setIsGameClosed(true);      
+              })
+              .catch(error => console.error('Error fetching correct player:', error));
+          }
+
+
         })
         .catch(error => alert('Player not found'));
     }
 };
 
 
+
     const handleSearchInputChange = (e) => {
     const input = e.target.value;
     setGuessInput(input);
 
-        if (input.length > 0) {
-            
-            axios.get('http://localhost:8000/api/search', {
-                params: { query: input }
-            })
-                .then(response => {
-                    setSuggestions(response.data);
-                })
-                .catch(error => {
-                    console.error('Error fetching search suggestions', error);
-                });
-        } else {
-            setSuggestions([]);
-        }
-    };
+
     if (input.length > 0) {
        
         axios.get('http://localhost:8000/api/search', { params: { query: input } })
@@ -167,44 +154,10 @@ function Play() {
 
     return (
         <div className="min-h-screen bg-stone-100 text-stone-800 p-4">
-            
-          {showCongratulations && (
-                <>
-                    {/* Show confetti when correct guess is made */}
-                    <Confetti width={window.innerWidth} height={window.innerHeight} />
-                </>
-            )}
 
-            {/* Show Congratulations Popup */}
-            {showCongratulations && (
-                <div className="fixed inset-0 flex items-center justify-center z-50">
-                    <div className="relative bg-white p-6 rounded-lg shadow-lg text-center" style={{ maxWidth: '500px', width: '100%' }}>
-                        <div className="congrats-card">
-                            <img 
-                                src={playerImagePath} 
-                                alt="Player" 
-                                className="rounded-full w-32 h-32 mx-auto mb-4 shadow-lg" 
-                            />
-                            <h2 className="text-4xl font-bold text-green-700 mb-4">Congratulations!</h2>
-                            <p className="text-xl mb-6">You guessed the right player!</p>
-                            <button
-                                onClick={resetGame}  // Reset the game when the button is clicked
-                                className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-                            >
-                            {/* Background image with fade effect */}
-                            <div className="absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: `url('/path-to-your-background-image.jpg')` }}>
-                            </div>
-                                Play Again
-                            </button>
-
-                            
-                        </div>
-                    </div>
-                </div>
-            )}
-        {/* Header Section */}
             {showCongratulations && (
                 <Confetti width={window.innerWidth} height={window.innerHeight} />
+                
             )}
             {showCongratulations && popupVisible && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -215,9 +168,9 @@ function Play() {
                         
                         {/* Close button */}
                         <button
-                            onClick={() => {
+                            onClick={() => { {resetGame};
                                 setPopupVisible(false);
-                                setIsGameClosed(true);  // Disable further guesses when the user closes the popup
+                                setIsGameClosed(true);  
                             }}
                             className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 mr-4"  // Red background and margin-right for spacing
                         >
@@ -233,7 +186,33 @@ function Play() {
                     </div>
                 </div>
             )}
-            {/* Header Section */}
+
+             
+
+            {/* Failure Popup */}
+      {showFailurePopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="relative bg-white p-6 rounded-lg shadow-lg text-center" style={{ maxWidth: '500px', width: '100%' }}>
+            {correctPlayer && (
+              <>
+                <img src={correctPlayer.image_path} alt="Player" className="rounded-full w-32 h-32 mx-auto mb-4 shadow-lg" />
+                <h2 className="text-4xl font-bold text-red-700 mb-4">Game Over!</h2>
+                <p className="text-xl mb-6">The correct player was: <span className="font-bold">{correctPlayer.fullname}</span></p>
+              </>
+            )}
+
+            <button
+              onClick={resetGame}
+              className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            >
+              Play Again
+            </button>
+          </div>
+        </div>
+      )}
+
+       
+       
         <header className="flex justify-between items-center mb-8">
             <nav className="space-x-4">
             <Link to="/how-to-play" className="text-green-700 hover:underline">HOW TO PLAY</Link>
@@ -366,13 +345,16 @@ function Play() {
 
             {/* New Feature Section */}
             <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-2 rounded-md mb-4">
-            <span className="font-bold">NEW FEATURE!</span> Play past Stumple games in the <Link to="/archive" className="text-green-700 hover:underline">Archive</Link>
+            <span className="font-bold">NEW FEATURE!</span> Play past Bowled games in the <Link to="/archive" className="text-green-700 hover:underline">Archive</Link>
+            </div>
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-2 rounded-md mb-4">
+            <span className="font-bold">New mystery player every hour! Keep Bowling every Hour!!!</span> 
             </div>
 
             {/* Help Section */}
-            <p className="text-center mb-8">
+            {/* <p className="text-center mb-8">
             After a guess, click/hover on the [<HelpCircle className="inline w-4 h-4" />] in any yellow or blank square for help <span className="text-green-700">(disable in settings)</span>
-            </p>
+            </p> */}
 
             {/* Table Section */}
             <table className="w-full border-collapse mb-8">
@@ -450,15 +432,21 @@ function Play() {
             </tbody>
             </table>
             <p>{remainingGuesses} guesses remaining</p>
+            
         </main>
 
         {/* Footer Section */}
         <footer className="text-center mt-8">
             <p>
-            Enjoying Stumple?{' '}
-            <Link to="/donate" className="text-green-700 hover:underline">
-                Buy us a <Coffee className="inline w-4 h-4" />
-            </Link>{' '}
+            Enjoying Bowled?{' '}
+            <a
+            href="https://www.buymeacoffee.com/bowled"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-green-700 hover:underline"
+        >
+            Buy us a <Coffee className="inline w-4 h-4" />
+        </a>{' '}
             |{' '}
             <Link to="/feedback" className="text-green-700 hover:underline">
                 Give us feedback!

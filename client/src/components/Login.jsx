@@ -20,72 +20,66 @@ export default function LoginPage() {
         .then((userCredential) => {
             const user = userCredential.user;
             navigate('/');
-            console.log('Login Successfull', user);
+            console.log('Login Successful', user);
         })
         .catch((error) => {
-            console.log("Login Failed", error)
+            console.log("Login Failed", error);
             setError('Invalid email or password');
-        })
+        });
   };
-  const handleGoogleLogin = async () =>{
-    try{
+
+  const handleGoogleLogin = async () => {
+    try {
         await signInWithPopup(auth, googleProvider);
         navigate('/');
-    }
-    catch(error){
+    } catch (error) {
         setError(error.message);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      {/* Navigation */}
-      <nav className="flex justify-between items-center p-4">
-        <Link to="/" className="text-2xl font-bold">Stumple</Link>
-        <Link to="/" className="text-green-400 hover:text-green-300">Back to Home</Link>
-      </nav>
-
-      {/* Login Form and Image */}
-      <div className="flex-grow flex flex-col md:flex-row">
-        {/* Image Section */}
-        <div className="md:w-1/2 relative">
-          <img
-            src="https://pbs.twimg.com/media/FwbX_g1akAEZaS9.jpg:large"
-            alt="Gym equipment"
-            className="absolute inset-0 w-full h-full object-cover brightness-50"
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white text-center px-4">
-              
-            </h1>
-          </div>
-        </div>
+    <div className="min-h-screen relative bg-cover bg-center bg-no-repeat"
+         style={{
+           backgroundImage: `url('/images/bowll.webp')`,
+           height: "100vh",
+         }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black opacity-50"></div>
+      
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-col justify-between h-full">
+        {/* Navigation */}
+        <nav className="flex justify-between items-center p-4">
+          <Link to="/" className="text-2xl font-bold text-white">Bowled</Link>
+          <Link to="/" className="text-green-400 hover:text-green-300">Back to Home</Link>
+        </nav>
 
         {/* Login Form Section */}
-        <div className="md:w-1/2 flex items-center justify-center px-4 py-12 md:py-0">
-          <div className="w-full max-w-md">
-            <h2 className="text-3xl font-bold mb-6 text-center">Login to Your Account</h2>
+        <div className="flex flex-grow items-center justify-center px-4 py-12">
+          <div className="w-full max-w-md bg-gray-900 bg-opacity-70 p-8 rounded-lg">
+            <h2 className="text-3xl font-bold mb-6 text-center text-white">Login to Your Account</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">Email Address</label>
+                <label htmlFor="email" className="block text-sm font-medium text-white mb-2">Email Address</label>
                 <input
                   type="email"
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+                  className="w-full px-3 py-2 bg-gray-800 rounded-md focus:outline-none text-white focus:ring-2 focus:ring-green-400"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-2">Password</label>
+                <label htmlFor="password" className="block text-sm font-medium text-white mb-2">Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+                    className="w-full px-3 py-2 bg-gray-800 rounded-md focus:outline-none text-white focus:ring-2 focus:ring-green-400"
                     required
                   />
                   <button
@@ -109,7 +103,7 @@ export default function LoginPage() {
                     type="checkbox"
                     className="h-4 w-4 rounded border-gray-300 text-green-400 focus:ring-green-400"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm">Remember me</label>
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-white">Remember me</label>
                 </div>
                 <div className="text-sm">
                   <Link to="/forgot-password" className="text-green-400 hover:text-green-300">Forgot your password?</Link>
@@ -124,17 +118,17 @@ export default function LoginPage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </button>
               </div>
-            
             </form>
-            <br/>
+            
             {/* Google Login Button */}
             <button
-                onClick={handleGoogleLogin}
-                className="w-full max-w-md flex justify-center items-center mb-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                >
-                Login with Google
+              onClick={handleGoogleLogin}
+              className="w-full mt-6 flex justify-center items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            >
+              Login with Google
             </button>
-            <p className="mt-6 text-center text-sm">
+
+            <p className="mt-6 text-center text-sm text-white">
               Don't have an account?{" "}
               <Link to="/signup" className="text-green-400 hover:text-green-300 font-medium">
                 Sign up now
@@ -143,8 +137,6 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-
-      
     </div>
   );
 }
