@@ -11,7 +11,6 @@ function Play() {
     const [remainingGuesses, setRemainingGuesses] = useState(5);
     const [suggestions, setSuggestions] = useState([]);
     const [showAllSuggestions, setShowAllSuggestions] = useState(false);
-
     const [showCongratulations, setShowCongratulations] = useState(false);
     const [playerImagePath, setPlayerImagePath] = useState(''); 
     const [popupVisible, setPopupVisible] = useState(true);
@@ -33,69 +32,14 @@ function Play() {
         axios.get('http://localhost:8000/api/reset')
             .then(() => console.log("New target player selected"))
             .catch(error => console.error('Error resetting game', error));
-
     };
 
-    const [showAllSuggestions, setShowAllSuggestions] = useState(false);
-    const [showCongratulations, setShowCongratulations] = useState(false);
-    const [playerImagePath, setPlayerImagePath] = useState(''); 
-    const [popupVisible, setPopupVisible] = useState(true);
-    const [isGameClosed, setIsGameClosed] = useState(false);
-    
-    const resetGame = () => {
-        setGuesses([]);
-        setRemainingGuesses(5);
-        setGuessInput('');
-        setShowCongratulations(false);
-        setPopupVisible(true);
-        setIsGameClosed(false);
-
-        axios.get('http://localhost:8000/api/reset')
-            .then(() => console.log("New target player selected"))
-            .catch(error => console.error('Error resetting game', error));
-    };
-
-    // Fetch all players data on component mount
     useEffect(() => {
         axios.get("http://localhost:8000/api/players")
             .then(response => setPlayersData(response.data))
             .catch(error => console.error('Error fetching player data:', error));
     }, []);
 
-    const selectRandomPlayer = () => {
-    if (playersData.length > 0) {
-        const randomIndex = Math.floor(Math.random() * playersData.length);
-        const selectedPlayer = playersData[randomIndex];
-        
-        
-        setTargetPlayer({
-            fullname: selectedPlayer.fullname, 
-            image_path: selectedPlayer.image_path 
-        });
-    }
-};
-
-
-    // Update the target player every hour 
-    useEffect(() => {
-        
-        if (playersData.length > 0) {
-            selectRandomPlayer();
-        }
-
-        // Set interval to update the player every hour
-        const intervalId = setInterval(() => {
-            selectRandomPlayer();
-        }, 3600000);
-
-        // Cleanup the interval when component unmounts
-        return () => clearInterval(intervalId);
-    }, [playersData]); 
-
-
-
-
-    // Handle player guess
     const handleGuess = () => {
     if (remainingGuesses > 0 && guessInput.trim() !== "") {
         axios.get('http://localhost:8000/api/guess', {
@@ -112,7 +56,6 @@ function Play() {
                 setPopupVisible(true);
             }
 
-
             if (remainingGuesses - 1 === 0 && !showCongratulations) {
             axios.get('http://localhost:8000/api/target-player')
               .then(res => {
@@ -123,18 +66,16 @@ function Play() {
               .catch(error => console.error('Error fetching correct player:', error));
           }
 
-
+ 
         })
         .catch(error => alert('Player not found'));
     }
 };
 
 
-
     const handleSearchInputChange = (e) => {
     const input = e.target.value;
     setGuessInput(input);
-
 
     if (input.length > 0) {
        
@@ -154,7 +95,6 @@ function Play() {
 
     return (
         <div className="min-h-screen bg-stone-100 text-stone-800 p-4">
-
             {showCongratulations && (
                 <Confetti width={window.innerWidth} height={window.innerHeight} />
                 
@@ -211,8 +151,7 @@ function Play() {
         </div>
       )}
 
-       
-       
+            {/* Header Section */}
         <header className="flex justify-between items-center mb-8">
             <nav className="space-x-4">
             <Link to="/how-to-play" className="text-green-700 hover:underline">HOW TO PLAY</Link>
@@ -225,7 +164,6 @@ function Play() {
         {/* Main Section */}
         <main className="max-w-3xl mx-auto">
             <h1 className="text-5xl font-bold text-center text-green-800 mb-4">BOWLED</h1>
-            <h1 className="text-5xl font-bold text-center text-green-800 mb-4">BOWLED</h1>
             <p className="text-xl text-center mb-8">Guess the international cricketer</p>
 
             {/* Input Section */}
@@ -234,60 +172,12 @@ function Play() {
                 type="text"
                 value={guessInput}
                 onChange={handleSearchInputChange}  
-                onChange={handleSearchInputChange}  
                 placeholder="Guess any player, past, or present!"
                 className="w-full p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 disabled={isGameClosed}
             />
 
             {/* Dropdown for suggestions */}
-{suggestions.length > 0 && (
-    <div className="relative w-full bg-white border border-gray-300 rounded-md mt-2 shadow-lg z-10">
-        
-        {suggestions.slice(0, 3).map((player, index) => (
-            <div
-                key={index}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleSuggestionClick(player.fullname)}
-            >
-                {player.fullname}
-            </div>
-        ))}
-
-        {/* Show "See more" option if there are more than 5 suggestions */}
-        {suggestions.length > 3 && (
-            <div
-                className=" p-2 hover:bg-gray-100 cursor-pointer text-blue-600 font-semibold"
-                onClick={() => setShowAllSuggestions(true)}  // Handler to show all suggestions
-            >
-                <i>See more</i>
-            </div>
-        )}
-
-        {/* If 'See more' is clicked, show all suggestions */}
-        {showAllSuggestions && (
-            suggestions.map((player, index) => (
-                <div
-                    key={index}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSuggestionClick(player.fullname)}
-                >
-                    {player.fullname}
-                </div>
-            ))
-        )}
-    </div>
-)}
-{showAllSuggestions && (
-    <div
-        className="p-2 hover:bg-gray-100 cursor-pointer text-blue-600 font-semibold"
-        onClick={() => setShowAllSuggestions(false)}   
-    >
-        See less
-    </div>
-)}
-
-
 {suggestions.length > 0 && (
     <div className="relative w-full bg-white border border-gray-300 rounded-md mt-2 shadow-lg z-10">
         
@@ -361,46 +251,14 @@ function Play() {
             <thead>
                 <tr className="border-b border-green-300">
                 <th className="p-2 text-left text-green-700">Player</th>
-                <th className="p-2 text-left text-green-700">Player</th>
                 <th className="p-2 text-left text-green-700">Nation</th>
                 <th className="p-2 text-left text-green-700">Role</th>
-                <th className="p-2 text-left text-green-700">DOB/Year</th>
-                <th className="p-2 text-left text-green-700">Batting Style</th>
-                <th className="p-2 text-left text-green-700">Bowling Style</th>
                 <th className="p-2 text-left text-green-700">DOB/Year</th>
                 <th className="p-2 text-left text-green-700">Batting Style</th>
                 <th className="p-2 text-left text-green-700">Bowling Style</th>
                 </tr>
             </thead>
             <tbody>
-             {guesses.map((guess, index) => (
-    <tr key={index} className="border-b border-green-300">
-        <td className="p-2">{guess.fullname}</td>
-
-        <td className={`p-2 ${guess.country_match ? 'bg-green-300' : ''}`}>
-            {guess.country_name}
-        </td>
-
-        <td className={`p-2 ${guess.position_match ? 'bg-green-300' : ''}`}>
-            {guess.position}
-        </td>
-
-        
-        <td className={`p-2 ${guess.birthyear_match ? 'bg-green-300' : ''}`}>
-            {guess.birthyear} 
-        </td>
-
-        <td className={`p-2 ${guess.battingstyle_match ? 'bg-green-300' : ''}`}>
-            {guess.battingstyle}
-        </td>
-
-        <td className={`p-2 ${guess.bowlingstyle_match ? 'bg-green-300' : ''}`}>
-            {guess.bowlingstyle}
-        </td>
-    </tr>
-))}
-
-
              {guesses.map((guess, index) => (
     <tr key={index} className="border-b border-green-300">
         <td className="p-2">{guess.fullname}</td>
