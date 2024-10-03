@@ -18,7 +18,7 @@ app.use(cors({
 app.use(bodyParser.json());
 const PORT = 8000;
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Connected to MongoDB'))
+  .then(() => console.log('MongoDB Connection successfull'))
   .catch(err => console.error('Could not connect to MongoDB', err));
 
 
